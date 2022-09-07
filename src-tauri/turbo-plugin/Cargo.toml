@@ -1,0 +1,16 @@
+[package]
+name = "turbo-plugin"
+version = "0.1.0"
+authors = ["MikuroXina <ryosukadnak@gmail.com>"]
+edition = "2021"
+
+[dependencies]
+bytes = { version = "1.2.1", features = ["serde"] }
+fp-bindgen-support = { version = "2.2.0", features = ["async", "guest"] }
+once_cell = { version = "1.4" }
+rmp-serde = { version = "1.0" }
+serde = { version = "1.0", features = ["derive"] }
+
+[[example]]
+name = "vacant"
+crate-type = ["cdylib"]

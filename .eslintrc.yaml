@@ -1,0 +1,27 @@
+env:
+  browser: true
+  es2021: true
+  node: true
+extends:
+  - airbnb-typescript/base
+  - plugin:import/recommended
+  - plugin:@typescript-eslint/recommended
+  - plugin:prettier/recommended
+parser: "@typescript-eslint/parser"
+parserOptions:
+  project: ./tsconfig.json
+  sourceType: module
+  ecmaFeatures:
+    jsx: true
+plugins:
+  - "@typescript-eslint"
+  - prettier
+settings:
+  import/resolver:
+    node:
+      extensions:
+        - .js
+        - .ts
+        - .tsx
+rules:
+  prettier/prettier: "error"

@@ -1,0 +1,37 @@
+[package]
+name = "turbo"
+version = "0.1.0"
+description = "A Tauri App"
+authors = ["MikuroXina"]
+license = "GPL-3.0-or-later"
+repository = "https://github.com/MikuroXina/turbo.git"
+edition = "2021"
+rust-version = "1.57"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "1.0.0", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+tauri = { version = "1.0.0", features = ["dialog-all"] }
+wgpu = { version = "0.13.1", features = ["glsl"] }
+raw-window-handle = "0.4.0"
+naga = "0.9.0"
+fp-bindgen-support = { version = "2.2.0", features = ["async", "host"] }
+wasmer = { version = "2.3.0", features = ["singlepass"] }
+wasmer-wasi = "2.3.0"
+bytes = { version = "1.2.1", features = ["serde"] }
+
+[features]
+# by default Tauri runs in production mode
+# when `tauri dev` runs it is executed with `cargo run --no-default-features` if `devPath` is an URL
+default = ["custom-protocol"]
+# this feature is used used for production builds where `devPath` points to the filesystem
+# DO NOT remove this
+custom-protocol = ["tauri/custom-protocol"]
+
+[workspace]
+members = ["turbo-protocol", "turbo-plugin"]
