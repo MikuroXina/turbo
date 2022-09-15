@@ -13,19 +13,21 @@ import { decode, encode } from "@msgpack/msgpack";
 type FatPtr = bigint;
 
 export type Imports = {
+    getFromStore: (key: types.KeyPath) => types.PrimitiveParam | null;
     log: (message: string) => void;
+    registerRenderObject: (obj: types.RenderObject) => void;
+    registerShader: (obj: types.Shader) => void;
 };
 
 export type Exports = {
     load?: () => void;
     metadata?: () => types.Metadata;
-    renderObjectFactory?: (
-        format: types.FileFormat,
-        data: Uint8Array,
-    ) => types.Result<types.RenderObject, types.RenderObjectFactoryError>;
+    onComputeParameter?: (identifier: types.Identifier) => types.Param;
+    onFileHandle?: (identifier: types.Identifier, bytes: Uint8Array) => types.Param;
     unload?: () => void;
     metadataRaw?: () => Uint8Array;
-    renderObjectFactoryRaw?: (format: Uint8Array, data: Uint8Array) => Uint8Array;
+    onComputeParameterRaw?: (identifier: Uint8Array) => Uint8Array;
+    onFileHandleRaw?: (identifier: Uint8Array, bytes: Uint8Array) => Uint8Array;
 };
 
 /**
@@ -143,9 +145,21 @@ export async function createRuntime(
 
     const { instance } = await WebAssembly.instantiate(plugin, {
         fp: {
+            __fp_gen_get_from_store: (key_ptr: FatPtr): FatPtr => {
+                const key = parseObject<types.KeyPath>(key_ptr);
+                return serializeObject(importFunctions.getFromStore(key));
+            },
             __fp_gen_log: (message_ptr: FatPtr) => {
                 const message = parseObject<string>(message_ptr);
                 importFunctions.log(message);
+            },
+            __fp_gen_register_render_object: (obj_ptr: FatPtr) => {
+                const obj = parseObject<types.RenderObject>(obj_ptr);
+                importFunctions.registerRenderObject(obj);
+            },
+            __fp_gen_register_shader: (obj_ptr: FatPtr) => {
+                const obj = parseObject<types.Shader>(obj_ptr);
+                importFunctions.registerShader(obj);
             },
         },
     });
@@ -170,16 +184,23 @@ export async function createRuntime(
 
             return () => parseObject<types.Metadata>(export_fn());
         })(),
-        renderObjectFactory: (() => {
-            const export_fn = instance.exports.__fp_gen_render_object_factory as any;
+        onComputeParameter: (() => {
+            const export_fn = instance.exports.__fp_gen_on_compute_parameter as any;
             if (!export_fn) return;
 
-            return (format: types.FileFormat, data: Uint8Array) => {
-                const format_ptr = serializeObject(format);
-                const data_ptr = serializeObject(data);
-                return parseObject<
-                    types.Result<types.RenderObject, types.RenderObjectFactoryError>
-                >(export_fn(format_ptr, data_ptr));
+            return (identifier: types.Identifier) => {
+                const identifier_ptr = serializeObject(identifier);
+                return parseObject<types.Param>(export_fn(identifier_ptr));
+            };
+        })(),
+        onFileHandle: (() => {
+            const export_fn = instance.exports.__fp_gen_on_file_handle as any;
+            if (!export_fn) return;
+
+            return (identifier: types.Identifier, bytes: Uint8Array) => {
+                const identifier_ptr = serializeObject(identifier);
+                const bytes_ptr = serializeObject(bytes);
+                return parseObject<types.Param>(export_fn(identifier_ptr, bytes_ptr));
             };
         })(),
         unload: instance.exports.__fp_gen_unload as any,
@@ -189,14 +210,23 @@ export async function createRuntime(
 
             return () => importFromMemory(export_fn());
         })(),
-        renderObjectFactoryRaw: (() => {
-            const export_fn = instance.exports.__fp_gen_render_object_factory as any;
+        onComputeParameterRaw: (() => {
+            const export_fn = instance.exports.__fp_gen_on_compute_parameter as any;
             if (!export_fn) return;
 
-            return (format: Uint8Array, data: Uint8Array) => {
-                const format_ptr = exportToMemory(format);
-                const data_ptr = exportToMemory(data);
-                return importFromMemory(export_fn(format_ptr, data_ptr));
+            return (identifier: Uint8Array) => {
+                const identifier_ptr = exportToMemory(identifier);
+                return importFromMemory(export_fn(identifier_ptr));
+            };
+        })(),
+        onFileHandleRaw: (() => {
+            const export_fn = instance.exports.__fp_gen_on_file_handle as any;
+            if (!export_fn) return;
+
+            return (identifier: Uint8Array, bytes: Uint8Array) => {
+                const identifier_ptr = exportToMemory(identifier);
+                const bytes_ptr = exportToMemory(bytes);
+                return importFromMemory(export_fn(identifier_ptr, bytes_ptr));
             };
         })(),
     };

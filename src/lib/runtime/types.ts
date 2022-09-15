@@ -1,79 +1,193 @@
-/* eslint-disable */
 // ============================================= //
 // Types for WebAssembly runtime                 //
 //                                               //
 // This file is generated. PLEASE DO NOT MODIFY. //
 // ============================================= //
 
-export type ComponentType =
-    | { type: "I8" }
-    | { type: "I16" }
-    | { type: "U8" }
-    | { type: "U16" }
-    | { type: "F16" }
-    | { type: "F32" };
+export type Anchor = {
+    vertical: VerticalAnchor;
+    horizontal: HorizontalAnchor;
+};
 
-export type FileFormat = {
-    has_audio: boolean;
-    has_video: boolean;
-    codec: number;
+export type AudioSample = {
+    bytes: Uint8Array;
+    sample_rate: number;
+    channels: number;
+};
+
+export type ComponentType =
+    | "I8"
+    | "I16"
+    | "U8"
+    | "U16"
+    | "F16"
+    | "F32";
+
+export type ComputedParam = {
+    identifier: Identifier;
+};
+
+export type Dependency = {
+    plugin_id: Identifier;
+    version: VersionNumber;
+};
+
+export type FileHandle = {
+    identifier: Identifier;
+    output_type: FileHandleOutput;
+};
+
+export type FileHandleOutput =
+    | "Boolean"
+    | "Int"
+    | "Float"
+    | "ShortText"
+    | "LongText"
+    | "Vec2"
+    | "Vec3"
+    | "Mat2x2"
+    | "Mat2x3"
+    | "Mat2x4"
+    | "Mat3x2"
+    | "Mat3x3"
+    | "Mat3x4"
+    | "Mat4x2"
+    | "Mat4x3"
+    | "Mat4x4"
+    | "Anchor"
+    | "Texture"
+    | "AudioSample"
+    | "Shader";
+
+export type HorizontalAnchor =
+    | "Left"
+    | "Center"
+    | "Right";
+
+export type Identifier = string;
+
+export type KeyPath = Array<string>;
+
+export type Mat2x2 = {
+    components: Float64Array;
+};
+
+export type Mat2x3 = {
+    components: Float64Array;
+};
+
+export type Mat2x4 = {
+    components: Float64Array;
+};
+
+export type Mat3x2 = {
+    components: Float64Array;
+};
+
+export type Mat3x3 = {
+    components: Float64Array;
+};
+
+export type Mat3x4 = {
+    components: Float64Array;
+};
+
+export type Mat4x2 = {
+    components: Float64Array;
+};
+
+export type Mat4x3 = {
+    components: Float64Array;
+};
+
+export type Mat4x4 = {
+    components: Float64Array;
 };
 
 export type Metadata = {
-    identifier: string;
+    plugin_id: Identifier;
     version: VersionNumber;
-    dependencies: Array<string>;
+    dependencies: Array<Dependency>;
 };
+
+export type Param =
+    | { Primitive: PrimitiveParam }
+    | { Computed: ComputedParam };
+
+export type PrimitiveParam =
+    | { Boolean: boolean }
+    | { Int: number }
+    | { Float: number }
+    | { ShortText: string }
+    | { LongText: string }
+    | { Vec2: Vec2 }
+    | { Vec3: Vec3 }
+    | { Mat2x2: Mat2x2 }
+    | { Mat2x3: Mat2x3 }
+    | { Mat2x4: Mat2x4 }
+    | { Mat3x2: Mat3x2 }
+    | { Mat3x3: Mat3x3 }
+    | { Mat3x4: Mat3x4 }
+    | { Mat4x2: Mat4x2 }
+    | { Mat4x3: Mat4x3 }
+    | { Mat4x4: Mat4x4 }
+    | { Anchor: Anchor }
+    | { Texture: Texture }
+    | { AudioSample: AudioSample }
+    | { FileHandle: FileHandle }
+    | { Shader: Shader };
 
 export type RenderObject = {
-    inputs: Array<ShaderInput>;
-    vertex_shader: Shader;
-    fragment_shader: Shader;
+    identifier: Identifier;
+    name: string;
+    parameter: Record<KeyPath, Param>;
 };
 
-export type RenderObjectFactoryError = "Unsupported" | "OutOfMemory" | { IllegalFormat: string };
-
-/**
- * A result that can be either successful (`Ok`) or represent an error (`Err`).
- */
-export type Result<T, E> =
-    /**
-     * Represents a successful result.
-     */
-    | { Ok: T }
-    /**
-     * Represents an error.
-     */
-    | { Err: E };
-
 export type Shader = {
-    identifier: string;
+    identifier: Identifier;
     source: string;
+    inputs: Array<ShaderInput>;
 };
 
 export type ShaderInput =
-    | {
-          type: "In";
-          payload: {
-              key_path: string;
-              location: number;
-              components_per_vertex: number;
-              component_type: ComponentType;
-              normalized?: boolean;
-              strides?: number;
-              offset?: number;
-          };
-      }
-    | { type: "Uniform"; payload: { key_path: string; uniform_type: UniformType } };
+    | { In: { path: KeyPath; location: number; components_per_vertex: number; component_type: ComponentType; normalized?: boolean; strides?: number; offset?: number } }
+    | { Uniform: { path: KeyPath; uniform_type: UniformType } };
+
+export type Texture = {
+    bytes: Uint8Array;
+    width: number;
+    height: number;
+};
 
 export type UniformType =
-    | { type: "Int" }
-    | { type: "UInt" }
-    | { type: "Float" }
-    | { type: "FloatMatrix"; payload: { columns: number; rows: number } };
+    | "Int"
+    | "UInt"
+    | "Float"
+    | "Mat2x2"
+    | "Mat2x3"
+    | "Mat2x4"
+    | "Mat3x2"
+    | "Mat3x3"
+    | "Mat3x4"
+    | "Mat4x2"
+    | "Mat4x3"
+    | "Mat4x4";
+
+export type Vec2 = {
+    components: Float64Array;
+};
+
+export type Vec3 = {
+    components: Float64Array;
+};
 
 export type VersionNumber = {
     major: number;
     minor: number;
     patch: number;
 };
+
+export type VerticalAnchor =
+    | "Top"
+    | "Center"
+    | "Bottom";

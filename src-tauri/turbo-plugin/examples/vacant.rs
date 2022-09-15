@@ -1,9 +1,6 @@
 use std::panic;
 
-use turbo_plugin::{
-    fp_export_impl, log, FileFormat, Metadata, RenderObject, RenderObjectFactoryError,
-    VersionNumber,
-};
+use turbo_plugin::{fp_export_impl, log, Identifier, Metadata, VersionNumber};
 
 fn init_panic_hook() {
     use std::sync::Once;
@@ -21,7 +18,7 @@ pub fn load() {
 #[fp_export_impl(turbo_plugin)]
 pub fn metadata() -> Metadata {
     Metadata {
-        identifier: "com.mikuroxina.vacant".into(),
+        plugin_id: Identifier("com.mikuroxina.vacant".into()),
         version: VersionNumber {
             major: 0,
             minor: 1,
@@ -29,14 +26,6 @@ pub fn metadata() -> Metadata {
         },
         dependencies: vec![],
     }
-}
-
-#[fp_export_impl(turbo_plugin)]
-pub fn render_object_factory(
-    _format: FileFormat,
-    _data: bytes::Bytes,
-) -> Result<RenderObject, RenderObjectFactoryError> {
-    Err(RenderObjectFactoryError::Unsupported)
 }
 
 #[fp_export_impl(turbo_plugin)]

@@ -1,18 +1,20 @@
 use fp_bindgen::prelude::*;
 
+use crate::common::{Identifier, KeyPath};
+
 #[repr(C)]
 #[derive(Debug, Clone, PartialEq, Eq, Serializable)]
 pub struct Shader {
-    pub identifier: String,
+    pub identifier: Identifier,
     pub source: String,
+    pub inputs: Vec<ShaderInput>,
 }
 
 #[repr(u8)]
 #[derive(Debug, Clone, PartialEq, Eq, Serializable)]
-#[fp(tag = "type", content = "payload")]
 pub enum ShaderInput {
     In {
-        key_path: String,
+        path: KeyPath,
         location: u32,
         components_per_vertex: u32,
         component_type: ComponentType,
@@ -21,14 +23,13 @@ pub enum ShaderInput {
         offset: Option<u32>,
     },
     Uniform {
-        key_path: String,
+        path: KeyPath,
         uniform_type: UniformType,
     },
 }
 
 #[repr(u8)]
 #[derive(Debug, Clone, PartialEq, Eq, Serializable)]
-#[fp(tag = "type")]
 pub enum ComponentType {
     I8,
     I16,
@@ -40,10 +41,17 @@ pub enum ComponentType {
 
 #[repr(u8)]
 #[derive(Debug, Clone, PartialEq, Eq, Serializable)]
-#[fp(tag = "type", content = "payload")]
 pub enum UniformType {
     Int,
     UInt,
     Float,
-    FloatMatrix { columns: u8, rows: u8 },
+    Mat2x2,
+    Mat2x3,
+    Mat2x4,
+    Mat3x2,
+    Mat3x3,
+    Mat3x4,
+    Mat4x2,
+    Mat4x3,
+    Mat4x4,
 }
