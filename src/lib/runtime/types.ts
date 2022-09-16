@@ -1,3 +1,4 @@
+/* eslint-disable */
 // ============================================= //
 // Types for WebAssembly runtime                 //
 //                                               //
@@ -15,13 +16,7 @@ export type AudioSample = {
     channels: number;
 };
 
-export type ComponentType =
-    | "I8"
-    | "I16"
-    | "U8"
-    | "U16"
-    | "F16"
-    | "F32";
+export type ComponentType = "I8" | "I16" | "U8" | "U16" | "F16" | "F32";
 
 export type ComputedParam = {
     identifier: Identifier;
@@ -59,10 +54,7 @@ export type FileHandleOutput =
     | "AudioSample"
     | "Shader";
 
-export type HorizontalAnchor =
-    | "Left"
-    | "Center"
-    | "Right";
+export type HorizontalAnchor = "Left" | "Center" | "Right";
 
 export type Identifier = string;
 
@@ -110,9 +102,7 @@ export type Metadata = {
     dependencies: Array<Dependency>;
 };
 
-export type Param =
-    | { Primitive: PrimitiveParam }
-    | { Computed: ComputedParam };
+export type Param = { Primitive: PrimitiveParam } | { Computed: ComputedParam };
 
 export type PrimitiveParam =
     | { Boolean: boolean }
@@ -140,7 +130,7 @@ export type PrimitiveParam =
 export type RenderObject = {
     identifier: Identifier;
     name: string;
-    parameter: Record<KeyPath, Param>;
+    parameter: Record<string, Param>;
 };
 
 export type Shader = {
@@ -150,7 +140,17 @@ export type Shader = {
 };
 
 export type ShaderInput =
-    | { In: { path: KeyPath; location: number; components_per_vertex: number; component_type: ComponentType; normalized?: boolean; strides?: number; offset?: number } }
+    | {
+          In: {
+              path: KeyPath;
+              location: number;
+              components_per_vertex: number;
+              component_type: ComponentType;
+              normalized?: boolean;
+              strides?: number;
+              offset?: number;
+          };
+      }
     | { Uniform: { path: KeyPath; uniform_type: UniformType } };
 
 export type Texture = {
@@ -187,7 +187,4 @@ export type VersionNumber = {
     patch: number;
 };
 
-export type VerticalAnchor =
-    | "Top"
-    | "Center"
-    | "Bottom";
+export type VerticalAnchor = "Top" | "Center" | "Bottom";
