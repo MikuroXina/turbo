@@ -64,6 +64,7 @@ pub enum FileHandleOutput {
     Texture,
     AudioSample,
     Shader,
+    Speaker,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Hash, Serialize)]
@@ -161,13 +162,14 @@ pub enum PrimitiveParam {
     AudioSample(AudioSample),
     FileHandle(FileHandle),
     Shader(Shader),
+    Speaker(Speaker),
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct RenderObject {
     pub identifier: Identifier,
     pub name: String,
-    pub parameter: HashMap<KeyPath, Param>,
+    pub parameter: HashMap<String, Param>,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Hash, Serialize)]
@@ -195,6 +197,11 @@ pub enum ShaderInput {
         path: KeyPath,
         uniform_type: UniformType,
     },
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Hash, Serialize)]
+pub struct Speaker {
+    pub identifier: Identifier,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Hash, Serialize)]

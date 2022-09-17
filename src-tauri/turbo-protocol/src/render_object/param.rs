@@ -1,7 +1,7 @@
 use bytes::Bytes;
 use fp_bindgen::prelude::*;
 
-use super::shader::Shader;
+use super::{shader::Shader, speaker::Speaker};
 use crate::common::Identifier;
 
 #[repr(u8)]
@@ -38,6 +38,7 @@ pub enum PrimitiveParam {
     AudioSample(AudioSample),
     FileHandle(FileHandle),
     Shader(Shader),
+    Speaker(Speaker),
 }
 
 #[repr(C)]
@@ -296,4 +297,5 @@ pub enum FileHandleOutput {
     Texture,
     AudioSample,
     Shader,
+    Speaker,
 }

@@ -8,6 +8,7 @@ use crate::common::Identifier;
 
 pub mod param;
 pub mod shader;
+pub mod speaker;
 
 #[repr(u8)]
 #[non_exhaustive]

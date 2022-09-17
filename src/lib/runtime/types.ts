@@ -52,7 +52,8 @@ export type FileHandleOutput =
     | "Anchor"
     | "Texture"
     | "AudioSample"
-    | "Shader";
+    | "Shader"
+    | "Speaker";
 
 export type HorizontalAnchor = "Left" | "Center" | "Right";
 
@@ -126,7 +127,8 @@ export type PrimitiveParam =
     | { Texture: Texture }
     | { AudioSample: AudioSample }
     | { FileHandle: FileHandle }
-    | { Shader: Shader };
+    | { Shader: Shader }
+    | { Speaker: Speaker };
 
 export type RenderObject = {
     identifier: Identifier;
@@ -153,6 +155,10 @@ export type ShaderInput =
           };
       }
     | { Uniform: { path: KeyPath; uniform_type: UniformType } };
+
+export type Speaker = {
+    identifier: Identifier;
+};
 
 export type Texture = {
     bytes: Uint8Array;
