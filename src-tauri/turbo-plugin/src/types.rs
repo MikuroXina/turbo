@@ -146,6 +146,7 @@ pub enum PrimitiveParam {
     LongText(String),
     Vec2(Vec2),
     Vec3(Vec3),
+    Vec4(Vec4),
     Mat2x2(Mat2x2),
     Mat2x3(Mat2x3),
     Mat2x4(Mat2x4),
@@ -226,7 +227,12 @@ pub struct Vec2 {
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Vec3 {
-    pub components: [f64; 2],
+    pub components: [f64; 3],
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct Vec4 {
+    pub components: [f64; 4],
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Hash, Serialize)]

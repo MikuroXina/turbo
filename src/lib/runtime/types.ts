@@ -112,6 +112,7 @@ export type PrimitiveParam =
     | { LongText: string }
     | { Vec2: Vec2 }
     | { Vec3: Vec3 }
+    | { Vec4: Vec4 }
     | { Mat2x2: Mat2x2 }
     | { Mat2x3: Mat2x3 }
     | { Mat2x4: Mat2x4 }
@@ -178,6 +179,10 @@ export type Vec2 = {
 };
 
 export type Vec3 = {
+    components: Float64Array;
+};
+
+export type Vec4 = {
     components: Float64Array;
 };
 

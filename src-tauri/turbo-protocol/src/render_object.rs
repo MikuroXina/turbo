@@ -4,7 +4,7 @@ use fp_bindgen::prelude::*;
 use thiserror::Error;
 
 use self::param::Param;
-use crate::common::{Identifier, KeyPath};
+use crate::common::Identifier;
 
 pub mod param;
 pub mod shader;
@@ -27,5 +27,5 @@ pub enum RenderObjectFactoryError {
 pub struct RenderObject {
     pub identifier: Identifier,
     pub name: String,
-    pub parameter: HashMap<KeyPath, Param>,
+    pub parameter: HashMap<String, Param>,
 }
