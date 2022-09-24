@@ -120,20 +120,20 @@ All RenderObjects are registered by some plugin. The user can create a new Rende
 To register RenderObject, you only need to provide information of that's identifier and parameters. In other words, a RenderObject is the set of parameters. You can register your RenderObject in the register phase handler of your plugin. The identifier must not conflict in your plugin, but conflicting to another plugin occurs no problem. Here are example code:
 
 ```rs
-use turbo_plugin::{ComputedParam, ComputedParamType, PrimitiveParam, register_render_object};
+use turbo_plugin::{ComputedParam, ComputedParamType, ParamDefinition, RenderObjectDefinition, register_render_object};
 
 #[fp_export_impl(turbo_plugin)]
 pub fn register() {
     register_render_object(RenderObjectDefinition {
         identifier: "box".into(),
-        params: [
-            ("size".into(), PrimitiveParam::Vec3(1.0, 1.0, 1.0).into()),
-            ("hollow".into(), PrimitiveParam::Float(0.0).into()),
-            ("thickness".into(), ComputedParam {
-                identifier: "thickness".into(),
+        params: vec![
+            ParamDefinition::vec3("size", 1.0, 1.0, 1.0),
+            ParamDefinition::float("hollow", 0.0),
+            ParamDefinition::computed(
+                "thickness",
                 ty: ComputedParamType::Float,
-            }),
-        ].into_iter().collect(),
+            ),
+        ],
     });
 }
 ```
