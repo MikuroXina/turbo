@@ -197,6 +197,22 @@ pub fn on_register_phase() {
 // Define handlers for your registered items...
 ```
 
+### Load/Unload handler
+
+You can define load handler and unload handler, which invoked in the load phase and unload phase respectively. If you don't need to do any thing in the phase, you don't have to export it.
+
+```rs
+#[fp_export_impl(turbo_plugin)]
+pub fn load() {
+    // On the load phase...
+}
+
+#[fp_export_impl(turbo_plugin)]
+pub fn unload() {
+    // On the unload phase...
+}
+```
+
 ### FileHandle handler
 
 When you registered a `FileHandleDefinition`, you MUST define your file handler to parse actual data from the file binary. The provided file handle, `TurboFile` implements `std::io::{BufRead, Read, Seek}`. It can be used in some reader library.
