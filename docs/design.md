@@ -54,6 +54,8 @@ Constraints parameters of all primitive params are following:
   - identifier
 - `Speaker`
   - identifier
+- `RenderObjectRef`
+  - type
 
 ### Computed param
 
