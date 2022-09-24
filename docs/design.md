@@ -197,6 +197,22 @@ pub fn register() {
 // Define handlers for your registered items...
 ```
 
+### Load/Unload handler
+
+You can define load handler and unload handler, which invoked in the load phase and unload phase respectively. If you don't need to do any thing in the phase, you don't have to export it.
+
+```rs
+#[fp_export_impl(turbo_plugin)]
+pub fn load() {
+    // On the load phase...
+}
+
+#[fp_export_impl(turbo_plugin)]
+pub fn unload() {
+    // On the unload phase...
+}
+```
+
 ### Compute handler
 
 When you registered a `ComputedParam`, you MUST define your compute handlers to read/write actual data. Otherwise, Turbo will report an error to the user and disable your plugin.
@@ -228,22 +244,6 @@ pub fn write_compute(identifier: Identifier, written: Param) {
         size.components[0] = new_width;
         set_local("size", size);
     }
-}
-```
-
-### Load/Unload handler
-
-You can define load handler and unload handler, which invoked in the load phase and unload phase respectively. If you don't need to do any thing in the phase, you don't have to export it.
-
-```rs
-#[fp_export_impl(turbo_plugin)]
-pub fn load() {
-    // On the load phase...
-}
-
-#[fp_export_impl(turbo_plugin)]
-pub fn unload() {
-    // On the unload phase...
 }
 ```
 
