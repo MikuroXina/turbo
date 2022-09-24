@@ -39,6 +39,7 @@ pub enum PrimitiveParam {
     FileHandle(FileHandle),
     Shader(Shader),
     Speaker(Speaker),
+    RenderObjectRef(Identifier),
 }
 
 #[repr(C)]
