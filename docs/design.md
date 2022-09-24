@@ -124,7 +124,7 @@ use turbo_plugin::{ComputedParam, ComputedParamType, PrimitiveParam, register_re
 
 #[fp_export_impl(turbo_plugin)]
 pub fn on_register_phase() {
-    register_render_object(RenderObject {
+    register_render_object(RenderObjectDefinition {
         identifier: "box".into(),
         params: [
             ("size".into(), PrimitiveParam::Vec3(1.0, 1.0, 1.0).into()),
