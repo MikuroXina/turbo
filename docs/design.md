@@ -182,7 +182,7 @@ If you registered FileHandle or Speaker, you MUST defined the handler following 
 use turbo_plugin::{register_file_handle, register_shader, register_speaker};
 
 #[fp_export_impl(turbo_plugin)]
-pub fn on_register_phase() {
+pub fn register() {
     register_file_handle(FileHandleDefinition {
         // ...
     });
@@ -195,6 +195,40 @@ pub fn on_register_phase() {
 }
 
 // Define handlers for your registered items...
+```
+
+### Compute handler
+
+When you registered a `ComputedParam`, you MUST define your compute handlers to read/write actual data. Otherwise, Turbo will report an error to the user and disable your plugin.
+
+```rs
+use turbo_plugin::{Identifier, Param, Vec2, get_local, set_local};
+
+#[fp_export_impl(turbo_plugin)]
+pub fn read_compute(identifier: Identifier) -> Param {
+    if identifier == "top_right" {
+        let top_left = get_local::<Vec2>("top_left").unwrap();
+        let width = get_local::<Vec2>("size").unwrap().components[0];
+        return Param::Vec2(top_left + Vec2::new(width, 0));
+    }
+    unreachable!()
+}
+
+#[fp_export_impl(turbo_plugin)]
+pub fn write_compute(identifier: Identifier, written: Param) {
+    if identifier == "top_right" {
+        let top_right: Vec2 = written.try_into().unwrap();
+        let top_left = get_local::<Vec2>("top_left").unwrap();
+        let new_width = (top_right - top_left).components[0];
+        if new_width < 0 {
+            return;
+        }
+
+        let mut size = get_local::<Vec2>("size").unwrap();
+        size.components[0] = new_width;
+        set_local("size", size);
+    }
+}
 ```
 
 ### Load/Unload handler
@@ -222,7 +256,7 @@ use turbo_plugin::types::{FileHandle, Param, Result, TurboFile};
 use mp4::Mp4Reader;
 
 #[fp_bindgen_support::fp_export_signature]
-pub fn on_file_handle(handle: FileHandle, file: TurboFile) -> Result<Param> {
+pub fn file_handle(handle: FileHandle, file: TurboFile) -> Result<Param> {
     if handle.identifier == "mp4" {
         let mp4 = Mp4Reader(file, f.len());
 
@@ -242,18 +276,18 @@ pub fn on_file_handle(handle: FileHandle, file: TurboFile) -> Result<Param> {
 When you registered a `SpeakerDefinition`, you MUST define your speaker handler to process audio waveforms quickly. You should not allocate any memory on the process, invoke another slow function, or lock the thread for a while in your handler. Doing it may happen some bad experiences about the audio.
 
 ```rs
-use turbo_plugin::types::{AudioSample, Error, Float, Result, Speaker, Store, global, local};
+use turbo_plugin::types::{AudioSample, Error, Float, Result, Speaker, get_global, get_local};
 
 #[fp_bindgen_support::fp_export_signature]
-pub fn on_speaker(speaker: Speaker) -> Result<AudioSample> {
+pub fn speaker(speaker: Speaker) -> Result<AudioSample> {
     if speaker.identifier == "" {
-        let fade_time = local::<Float>("fade_time")?.as_f64();
-        let source = global::<AudioSample>("microphone")?;
+        let fade_time = get_local::<Float>("fade_time")?.as_f64();
+        let source = get_global::<AudioSample>("microphone")?;
         if fade_time <= 0.0 {
             return Ok(source);
         }
-        let end_time = local::<Float>("end_time")?.as_f64();
-        let current_time = global::<Float>("current_time")?.as_f64();
+        let end_time = get_local::<Float>("end_time")?.as_f64();
+        let current_time = get_global::<Float>("current_time")?.as_f64();
         let volume = (end_time - current_time).clamp(0.0, fade_time) / fade_time;
         let mut faded = source.clone();
         for sample in faded.samples_mut() {
@@ -273,7 +307,7 @@ If you want to show own window for your plugin, you can do it by defining a wind
 use turbo_plugin::types::Html;
 
 #[fp_bindgen_support::fp_export_signature]
-pub fn on_window() -> Result<Html> {
+pub fn window() -> Result<Html> {
     Html::from_source(r"
 <!DOCTYPE HTML>
 <html>
