@@ -224,18 +224,18 @@ pub fn on_file_handle(handle: FileHandle, file: TurboFile) -> Result<Param> {
 When you registered a `SpeakerDefinition`, you MUST define your speaker handler to process audio waveforms quickly. You should not allocate any memory on the process, invoke another slow function, or lock the thread for a while in your handler. Doing it may happen some bad experiences about the audio.
 
 ```rs
-use turbo_plugin::types::{AudioSample, Error, Float, Result, Speaker, Store};
+use turbo_plugin::types::{AudioSample, Error, Float, Result, Speaker, Store, global, local};
 
 #[fp_bindgen_support::fp_export_signature]
-pub fn on_speaker(speaker: Speaker, store: Store) -> Result<AudioSample> {
+pub fn on_speaker(speaker: Speaker) -> Result<AudioSample> {
     if speaker.identifier == "" {
-        let fade_time = store.local::<Float>("fade_time")?.as_f64();
-        let source = store.global::<AudioSample>("microphone")?;
+        let fade_time = local::<Float>("fade_time")?.as_f64();
+        let source = global::<AudioSample>("microphone")?;
         if fade_time <= 0.0 {
             return Ok(source);
         }
-        let end_time = store.local::<Float>("end_time")?.as_f64();
-        let current_time = store.global::<Float>("current_time")?.as_f64();
+        let end_time = local::<Float>("end_time")?.as_f64();
+        let current_time = global::<Float>("current_time")?.as_f64();
         let volume = (end_time - current_time).clamp(0.0, fade_time) / fade_time;
         let mut faded = source.clone();
         for sample in faded.samples_mut() {
