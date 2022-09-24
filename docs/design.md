@@ -123,7 +123,7 @@ To register RenderObject, you only need to provide information of that's identif
 use turbo_plugin::{ComputedParam, ComputedParamType, PrimitiveParam, register_render_object};
 
 #[fp_export_impl(turbo_plugin)]
-pub fn on_register_phase() {
+pub fn register() {
     register_render_object(RenderObjectDefinition {
         identifier: "box".into(),
         params: [
