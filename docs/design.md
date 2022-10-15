@@ -96,6 +96,7 @@ All RenderObjects are forced to hold these params:
 - `position: Vec3`
 - `rotation: Vec4`
 - `scale: Vec3`
+- `model: Computed<Matrix4x4>`
 
 #### Static RenderObjects
 
@@ -119,20 +120,28 @@ All RenderObjects are registered by some plugin. The user can create a new Rende
 
 To register RenderObject, you only need to provide information of that's identifier and parameters. In other words, a RenderObject is the set of parameters. You can register your RenderObject in the register phase handler of your plugin. The identifier must not conflict in your plugin, but conflicting to another plugin occurs no problem. Here are example code:
 
-```rs
-use turbo_plugin::{ComputedParam, ComputedParamType, ParamDefinition, RenderObjectDefinition, register_render_object};
+```ts
+import type { Registrar } from "turbo-plugin";
 
-#[fp_export_impl(turbo_plugin)]
-pub fn register() {
-    register_render_object(RenderObjectDefinition {
-        identifier: "box".into(),
-        params: vec![
-            ParamDefinition::vec3("size", 1.0, 1.0, 1.0),
-            ParamDefinition::float("hollow", 0.0),
-            ParamDefinition::computed(
-                "thickness",
-                ty: ComputedParamType::Float,
-            ),
+export function register(registrar: Registrar) {
+    registrar.registerRenderObject({
+        identifier: "box",
+        params: [
+            {
+                name: "hollow",
+                type: "FLOAT",
+                defaultValue: 0.0,
+            },
+            {
+                name: "size",
+                type: "VEC3",
+                defaultValue: [1.0, 1.0, 1.0],
+            },
+            {
+                name: "thickness",
+                type: "COMPUTED",
+                computedType: "FLOAT",
+            },
         ],
     });
 }
@@ -157,18 +166,18 @@ The plugin version is treated as [Semantic Versioning 2.0.0](https://semver.org/
 
 If the incompatible version of the plugin is detected, Turbo will ask the user whether to enable or disable the plugin with showing the conflicted version of them.
 
-```rs
-use turbo_plugin::Metadata;
+```ts
+import type { Metadata } from "turbo-plugin";
 
-#[fp_export_impl(turbo_plugin)]
-pub fn metadata() -> Metadata {
-    Metadata {
-        identifier: "MikuroXina.tween-editor".into(),
-        version: (0, 1, 0).into(),
-        dependencies: vec![
-            ("MikuroXina.property-editor", (0, 1, 0).into()),
-        ],
-    }
+export function metadata(): Metadata {
+    return {
+        identifier: "MikuroXina.tween-editor",
+        version: [0, 1, 0],
+        dependencies: {
+            "turbo": [0, 1, 0],
+            "MikuroXina.property-editor": [0, 1, 0],
+        },
+    };
 }
 ```
 
@@ -178,37 +187,34 @@ You can define your register handler to register FileHandles, Shaders and Speake
 
 If you registered FileHandle or Speaker, you MUST defined the handler following below sections. Otherwise, Turbo will report an error to the user and disable your plugin.
 
-```rs
-use turbo_plugin::{register_file_handle, register_shader, register_speaker};
+```ts
+import type { Registrar } from "turbo-plugin";
 
-#[fp_export_impl(turbo_plugin)]
-pub fn register() {
-    register_file_handle(FileHandleDefinition {
+export function register(registrar: Registrar) {
+    registrar.registerFileHandle({
         // ...
     });
-    register_shader(ShaderDefinition {
+    registrar.registerShader({
         // ...
     });
-    register_speaker(SpeakerDefinition {
+    registrar.registerSpeaker({
         // ...
     });
 }
 
-// Define handlers for your registered items...
+// Export handlers for your registered items...
 ```
 
 ### Load/Unload handler
 
 You can define load handler and unload handler, which invoked in the load phase and unload phase respectively. If you don't need to do any thing in the phase, you don't have to export it.
 
-```rs
-#[fp_export_impl(turbo_plugin)]
-pub fn load() {
+```js
+export function load() {
     // On the load phase...
 }
 
-#[fp_export_impl(turbo_plugin)]
-pub fn unload() {
+export function unload() {
     // On the unload phase...
 }
 ```
@@ -217,57 +223,69 @@ pub fn unload() {
 
 When you registered a `ComputedParam`, you MUST define your compute handlers to read/write actual data. Otherwise, Turbo will report an error to the user and disable your plugin.
 
-```rs
-use turbo_plugin::{Identifier, Param, Vec2, get_local, set_local};
+```ts
+import {
+    Identifier,
+    Param,
+    Size,
+    Vec2,
+    getLocal,
+    setLocal,
+} from "turbo-plugin";
 
-#[fp_export_impl(turbo_plugin)]
-pub fn read_compute(identifier: Identifier) -> Param {
-    if identifier == "top_right" {
-        let top_left = get_local::<Vec2>("top_left").unwrap();
-        let width = get_local::<Vec2>("size").unwrap().components[0];
-        return Param::Vec2(top_left + Vec2::new(width, 0));
+export function read_compute(identifier: Identifier): Param {
+    switch (identifier) {
+        case "top_right": {
+           const topLeft = getLocal<Vec2>("top_left");
+           const width = getLocal<Vec2>("size").components[0];
+           return new Vec2(topLeft.addComponents(...[width, 0]));
+        }
     }
-    unreachable!()
+    throw new Error("unknown identifier");
 }
 
-#[fp_export_impl(turbo_plugin)]
-pub fn write_compute(identifier: Identifier, written: Param) {
-    if identifier == "top_right" {
-        let top_right: Vec2 = written.try_into().unwrap();
-        let top_left = get_local::<Vec2>("top_left").unwrap();
-        let new_width = (top_right - top_left).components[0];
-        if new_width < 0 {
+export function write_compute(identifier: Identifier, written: Param) {
+    if (identifier == "top_right") {
+        const topRight: Vec2 = written.down_cast<Vec2>();
+        const topLeft = getLocal<Vec2>("top_left");
+        const newWidth = topRight.sub(topLeft).components[0];
+        if (newWidth < 0) {
             return;
         }
 
-        let mut size = get_local::<Vec2>("size").unwrap();
-        size.components[0] = new_width;
-        set_local("size", size);
+        const size = getLocal<Size>("size");
+        size.width = newWidth;
+        setLocal("size", size);
+        return;
     }
+    // ...
+    throw new Error("unknown identifier");
 }
 ```
 
 ### FileHandle handler
 
-When you registered a `FileHandleDefinition`, you MUST define your file handler to parse actual data from the file binary. The provided file handle, `TurboFile` implements `std::io::{BufRead, Read, Seek}`. It can be used in some reader library.
+When you registered a `FileHandleDefinition`, you MUST define your file handler to parse actual data from the file binary.
 
-```rs
-use turbo_plugin::types::{FileHandle, Param, Result, TurboFile};
-use mp4::Mp4Reader;
+```ts
+import { FileHandle, Param, TurboFile } from "turbo-plugin";
+import { readMp4 } from "some-mp4-reader";
 
-#[fp_bindgen_support::fp_export_signature]
-pub fn file_handle(handle: FileHandle, file: TurboFile) -> Result<Param> {
-    if handle.identifier == "mp4" {
-        let mp4 = Mp4Reader(file, f.len());
+export function file_handle(handle: FileHandle): Param {
+    if (handle.identifier == "mp4") {
+        const mp4 = readMp4(handle.blob);
 
-        for track_id in mp4.tracks().keys().copied() {
-            let sample_count = mp4.sample_count(track_id).unwrap();
+        for (const trackId in mp4.track_keys()) {
+            const sampleCount = mp4.sampleCount(trackId);
 
-            for sample_id in 1..=sample_count {
-                let sample = mp4.read_sample(track_id, sample_id);
+            for (let sampleId = 1; sampleId <= sampleCount; ++sampleId) {
+                const sample = mp4.readSample(trackId, sampleId);
+                // Use for something...
             }
         }
     }
+    // ...
+    throw new Error("unknown identifier");
 }
 ```
 
@@ -275,52 +293,42 @@ pub fn file_handle(handle: FileHandle, file: TurboFile) -> Result<Param> {
 
 When you registered a `SpeakerDefinition`, you MUST define your speaker handler to process audio waveforms quickly. You should not allocate any memory on the process, invoke another slow function, or lock the thread for a while in your handler. Doing it may happen some bad experiences about the audio.
 
-```rs
-use turbo_plugin::types::{AudioSample, Error, Float, Result, Speaker, get_global, get_local};
+```ts
+import { AudioSample, Float, Speaker, getGlobal, getLocal } from "turbo-plugin ";
 
-#[fp_bindgen_support::fp_export_signature]
-pub fn speaker(speaker: Speaker) -> Result<AudioSample> {
-    if speaker.identifier == "" {
-        let fade_time = get_local::<Float>("fade_time")?.as_f64();
-        let source = get_global::<AudioSample>("microphone")?;
-        if fade_time <= 0.0 {
-            return Ok(source);
+export function speaker(speaker: Speaker): AudioSample {
+    if (speaker.identifier == "fader") {
+        const fade_time = getLocal<Float>("fade_time").as_f64();
+        const source = getGlobal<AudioSample>("microphone");
+        if (fade_time <= 0.0) {
+            return source.sample;
         }
-        let end_time = get_local::<Float>("end_time")?.as_f64();
-        let current_time = get_global::<Float>("current_time")?.as_f64();
-        let volume = (end_time - current_time).clamp(0.0, fade_time) / fade_time;
-        let mut faded = source.clone();
+        const end_time = getLocal<Float>("end_time")?.as_f64();
+        const current_time = getGlobal<Float>("current_time")?.as_f64();
+        const volume = (end_time - current_time).clamp(0.0, fade_time) / fade_time;
+        const faded = source.clone();
         for sample in faded.samples_mut() {
             *sample *= volume;
         }
         Ok(faded)
     }
-    Err(Error::Unsupported)
+    // ...
+    throw new Error("unknown identifier");
 }
 ```
 
 ### Window handler (WIP)
 
-If you want to show own window for your plugin, you can do it by defining a window handler, which displays your HTML page and communicate with only your plugin. Accessing the internet and/or files is restricted, but it can realize by Turbo API via your plugin code.
+If you want to show own window for your plugin, you can do it by defining a window handler, which displays your React element and communicate with only your plugin. Accessing the internet and/or files is restricted, but it can realize by Turbo API via your plugin code.
 
-```rs
-use turbo_plugin::types::Html;
+```tsx
+export function window(): JSX.Element {
+    // TODO: more usable hooks...
 
-#[fp_bindgen_support::fp_export_signature]
-pub fn window() -> Result<Html> {
-    Html::from_source(r"
-<!DOCTYPE HTML>
-<html>
-    <head>
-        <title>My Window</title>
-    </head>
-    <body>
-        <h1>Hello, world!</h1>
-        <script>
-        console.log('test');
-        </script>
-    </body>
-</html>
-    ")
+    return (
+        <div>
+            <h1>Hello, world!</h1>
+        </div>
+    );
 }
 ```
