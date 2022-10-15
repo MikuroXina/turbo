@@ -233,7 +233,7 @@ import {
     setLocal,
 } from "turbo-plugin";
 
-export function read_compute(identifier: Identifier): Param {
+export function readCompute(identifier: Identifier): Param {
     switch (identifier) {
         case "top_right": {
            const topLeft = getLocal<Vec2>("top_left");
@@ -244,7 +244,7 @@ export function read_compute(identifier: Identifier): Param {
     throw new Error("unknown identifier");
 }
 
-export function write_compute(identifier: Identifier, written: Param) {
+export function writeCompute(identifier: Identifier, written: Param) {
     if (identifier == "top_right") {
         const topRight: Vec2 = written.down_cast<Vec2>();
         const topLeft = getLocal<Vec2>("top_left");
@@ -271,7 +271,7 @@ When you registered a `FileHandleDefinition`, you MUST define your file handler 
 import { FileHandle, Param, TurboFile } from "turbo-plugin";
 import { readMp4 } from "some-mp4-reader";
 
-export function file_handle(handle: FileHandle): Param {
+export function fileHandle(handle: FileHandle): Param {
     if (handle.identifier == "mp4") {
         const mp4 = readMp4(handle.blob);
 
