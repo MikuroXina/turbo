@@ -8,6 +8,7 @@ export interface Pipeline {
 
 export class WebGlPipeline implements Pipeline {
     private readonly ctx: WebGL2RenderingContext;
+
     private readonly shaders: WebGLProgram[] = [];
 
     constructor(elem: HTMLCanvasElement) {
