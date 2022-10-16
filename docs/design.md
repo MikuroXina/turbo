@@ -268,7 +268,8 @@ export function writeCompute(identifier: Identifier, written: Param) {
 When you registered a `FileHandleDefinition`, you MUST define your file handler to parse actual data from the file binary.
 
 ```ts
-import { FileHandle, Param, TurboFile } from "turbo-plugin";
+import type { FileHandle } from "fs/promises";
+import { Param, TurboFile } from "turbo-plugin";
 import { readMp4 } from "some-mp4-reader";
 
 export function fileHandle(handle: FileHandle): Param {
@@ -294,10 +295,10 @@ export function fileHandle(handle: FileHandle): Param {
 When you registered a `SpeakerDefinition`, you MUST define your speaker handler to process audio waveforms quickly. You should not allocate any memory on the process, invoke another slow function, or lock the thread for a while in your handler. Doing it may happen some bad experiences about the audio.
 
 ```ts
-import { AudioSample, Float, Speaker, getGlobal, getLocal } from "turbo-plugin ";
+import { AudioSample, Float, Identifier, getGlobal, getLocal } from "turbo-plugin ";
 
-export function speaker(speaker: Speaker): AudioSample {
-    if (speaker.identifier == "fader") {
+export function speaker(identifier: Identifier): AudioSample {
+    if (identifier == "fader") {
         const fade_time = getLocal<Float>("fade_time").as_f64();
         const source = getGlobal<AudioSample>("microphone");
         if (fade_time <= 0.0) {
