@@ -238,7 +238,7 @@ export function readCompute(identifier: Identifier): Param {
         case "top_right": {
            const topLeft = getLocal<Vec2>("top_left");
            const width = getLocal<Vec2>("size").components[0];
-           return new Vec2(topLeft.addComponents(...[width, 0]));
+           return topLeft.add(new Vec2(width, 0));
         }
     }
     throw new Error("unknown identifier");
