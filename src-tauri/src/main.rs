@@ -4,13 +4,10 @@
 )]
 
 use serde::{Deserialize, Serialize};
-use std::{fs::File, io::Read};
-
-mod plugin;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Plugin {
-    wasm_binary: Vec<u8>,
+    source: String,
 }
 
 #[tauri::command]
@@ -21,12 +18,9 @@ fn all_plugins() -> Result<Vec<Plugin>, String> {
         .flatten()
     {
         if entry.path().is_file() {
-            let mut file = File::open(entry.path())
-                .map_err(|_| format!("failed to open file: {}", entry.path().display()))?;
-            let mut wasm_binary = Vec::new();
-            file.read_to_end(&mut wasm_binary)
-                .map_err(|_| format!("failed to read binary: {}", entry.path().display()))?;
-            plugins.push(Plugin { wasm_binary });
+            let source = std::fs::read_to_string(entry.path())
+                .map_err(|_| format!("failed to read file: {}", entry.path().display()))?;
+            plugins.push(Plugin { source });
         }
     }
     Ok(plugins)
